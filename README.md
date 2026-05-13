@@ -53,11 +53,49 @@ Nullcost routes that to the hosted catalog and returns a compact DB-backed short
 
 ## Fast Install
 
-In Codex or another plugin-aware coding app, ask:
+Use the installer instead of spending agent tokens on setup:
+
+```bash
+npx nullcost-plugin@latest install codex
+```
+
+Other MCP clients:
+
+```bash
+npx nullcost-plugin@latest install claude
+npx nullcost-plugin@latest install cursor
+npx nullcost-plugin@latest install windsurf
+```
+
+For any MCP-compatible app with a custom config path:
+
+```bash
+npx nullcost-plugin@latest install mcp --config /path/to/mcp.json
+```
+
+The installer copies the plugin into a stable local directory, installs the MCP server dependencies, backs up any config file before editing it, configures the target harness, and runs a doctor check.
+
+## Verify Install
+
+```bash
+npx nullcost-plugin@latest doctor
+```
+
+For a faster check that only confirms the MCP server starts and advertises the expected tools:
+
+```bash
+npx nullcost-plugin@latest doctor --quick
+```
+
+## Agent Install Fallback
+
+If you prefer the "let the agent wire itself up" path, paste this into Codex:
 
 ```text
 Install the Nullcost Catalog plugin from https://github.com/johnvouros/nullcost-plugin. Use it when I ask about cheap or free-tier developer tools. If plugin install is not supported here, configure the Nullcost MCP server instead.
 ```
+
+This works well, but it uses model tokens. The `npx` installer is the recommended default for no-token setup.
 
 ## Raw MCP Config
 
@@ -79,11 +117,19 @@ If your client supports stdio MCP but not plugins, clone this repo and point the
 
 Replace `/path/to/nullcost-plugin` with your local clone path.
 
+You can print target-specific snippets without writing files:
+
+```bash
+npx nullcost-plugin@latest config codex
+npx nullcost-plugin@latest config mcp
+```
+
 ## Local Test
 
 ```bash
 npm install
 npm run version:check
+npm run doctor
 npm run mcp:catalog
 ```
 

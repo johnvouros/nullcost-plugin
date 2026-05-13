@@ -22,7 +22,29 @@
     "developer-tools",
     "pricing-catalog"
   ],
+  "bin": {
+    "nullcost-plugin": "bin/nullcost-plugin.mjs"
+  },
+  "files": [
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".mcp.json",
+    "assets/",
+    "bin/",
+    "docs/assets/",
+    "mcp/",
+    "scripts/",
+    "skills/",
+    "CHANGELOG.md",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "VERSION"
+  ],
   "scripts": {
+    "cli": "node ./bin/nullcost-plugin.mjs",
+    "doctor": "node ./bin/nullcost-plugin.mjs doctor --plugin-dir . --quick",
+    "doctor:catalog": "node ./bin/nullcost-plugin.mjs doctor --plugin-dir .",
     "mcp:catalog": "node ./mcp/nullcost-provider-server.mjs",
     "version:check": "node ./scripts/check-version.mjs"
   },
