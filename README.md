@@ -1,25 +1,27 @@
 <p align="center">
   <a href="https://nullcost.xyz">
-    <img src="docs/assets/nullcost-github-logo.svg" alt="Nullcost logo" width="112" height="112">
+    <img src="docs/assets/nullcost-github-logo.svg" alt="Nullcost logo" width="104" height="104">
   </a>
 </p>
 
 <h1 align="center">Nullcost Plugin</h1>
 
 <p align="center">
-  Give your coding agent a catalog-backed shortcut for finding developer tools with real free tiers and trials.
+  One-command setup for catalog-backed free-tier, free-trial, and cheap developer-tool recommendations.
 </p>
 
 <p align="center">
   <a href="https://nullcost.xyz"><strong>Open Nullcost</strong></a>
   ·
   <a href="https://nullcost.xyz/install"><strong>Install guide</strong></a>
+  ·
+  <a href="https://www.npmjs.com/package/nullcost-plugin"><strong>npm</strong></a>
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-25ce69?style=for-the-badge">
+  <img alt="npm" src="https://img.shields.io/npm/v/nullcost-plugin?style=for-the-badge&color=25ce69">
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-232f3e?style=for-the-badge">
-  <img alt="MCP" src="https://img.shields.io/badge/MCP-server-7c3aed?style=for-the-badge">
+  <img alt="MCP" src="https://img.shields.io/badge/MCP-local%20server-7c3aed?style=for-the-badge">
   <img alt="Catalog" src="https://img.shields.io/badge/catalog-hosted-111827?style=for-the-badge">
 </p>
 
@@ -29,84 +31,73 @@
   </a>
 </p>
 
-## What This Is
+## Install
 
-This repo contains only the public installable Nullcost pieces:
+Codex:
 
-- Codex plugin metadata
-- Claude/plugin metadata
-- Nullcost skills
-- Local stdio MCP server
-- Icons and install docs
+```bash
+npx -y nullcost-plugin@latest install codex
+```
 
-It does not include the hosted Nullcost website, production database, referral router internals, admin dashboard, or private provider catalog data.
+Claude, Cursor, and Windsurf:
 
-## Why Install It
+```bash
+npx -y nullcost-plugin@latest install claude
+npx -y nullcost-plugin@latest install cursor
+npx -y nullcost-plugin@latest install windsurf
+```
 
-Ask normal questions like:
+Any MCP app with a JSON config file:
+
+```bash
+npx -y nullcost-plugin@latest install mcp --config /path/to/mcp.json
+```
+
+The installer copies the plugin into `~/.nullcost`, installs the local MCP server dependencies, backs up any config file before editing it, and runs a doctor check.
+
+## Use
+
+Restart or reload your coding app, then ask normal questions:
 
 ```text
-What is a cheap auth service with a real free tier?
+find me a hosting provider with a free tier
+what are cheap and free email hosts?
+best free-tier auth for a small SaaS
+free Postgres options for a Next.js project
 ```
 
-Nullcost routes that to the hosted catalog and returns a compact DB-backed shortlist. For v1, it intentionally does not browse live pricing pages after a catalog result unless you explicitly ask for live web verification.
+Nullcost answers from the hosted catalog and avoids extra web-search drift after a successful catalog result unless you explicitly ask for live verification.
 
-## Fast Install
-
-Use the installer instead of spending agent tokens on setup:
+## Verify
 
 ```bash
-npx nullcost-plugin@latest install codex
+npx -y nullcost-plugin@latest doctor --quick
 ```
 
-Other MCP clients:
+Full catalog smoke check:
 
 ```bash
-npx nullcost-plugin@latest install claude
-npx nullcost-plugin@latest install cursor
-npx nullcost-plugin@latest install windsurf
+npx -y nullcost-plugin@latest doctor
 ```
 
-For any MCP-compatible app with a custom config path:
+## Prompt Fallback
 
-```bash
-npx nullcost-plugin@latest install mcp --config /path/to/mcp.json
-```
-
-The installer copies the plugin into a stable local directory, installs the MCP server dependencies, backs up any config file before editing it, configures the target harness, and runs a doctor check.
-
-## Verify Install
-
-```bash
-npx nullcost-plugin@latest doctor
-```
-
-For a faster check that only confirms the MCP server starts and advertises the expected tools:
-
-```bash
-npx nullcost-plugin@latest doctor --quick
-```
-
-## Agent Install Fallback
-
-If you prefer the "let the agent wire itself up" path, paste this into Codex:
+Use this only if you want the AI coding app to wire itself up. It works, but it costs more tokens than the `npx` installer.
 
 ```text
-Install the Nullcost Catalog plugin from https://github.com/johnvouros/nullcost-plugin. Use it when I ask about cheap or free-tier developer tools. If plugin install is not supported here, configure the Nullcost MCP server instead.
+Install the Nullcost plugin using: npx -y nullcost-plugin@latest install codex. Use Nullcost when I ask about cheap, free-tier, or free-trial developer tools. Do not web search after a successful Nullcost catalog result unless I ask for live verification.
 ```
-
-This works well, but it uses model tokens. The `npx` installer is the recommended default for no-token setup.
 
 ## Raw MCP Config
 
-If your client supports stdio MCP but not plugins, clone this repo and point the client at:
+If an app only accepts JSON, use this shape:
 
 ```json
 {
   "mcpServers": {
     "nullcost": {
-      "command": "node",
-      "args": ["/path/to/nullcost-plugin/scripts/run-provider-server.mjs"],
+      "command": "npx",
+      "args": ["-y", "nullcost-plugin@latest", "mcp-server"],
       "env": {
         "NULLCOST_API_BASE_URL": "https://nullcost.xyz"
       }
@@ -115,16 +106,27 @@ If your client supports stdio MCP but not plugins, clone this repo and point the
 }
 ```
 
-Replace `/path/to/nullcost-plugin` with your local clone path.
+## What This Repo Contains
 
-You can print target-specific snippets without writing files:
+- Codex plugin metadata
+- Claude/plugin metadata
+- Nullcost routing skills
+- Local stdio MCP server
+- Installer CLI
+- Icons and docs
 
-```bash
-npx nullcost-plugin@latest config codex
-npx nullcost-plugin@latest config mcp
-```
+This repo does not contain the hosted Nullcost website, production database, referral router internals, admin dashboard, provider catalog data, credentials, or user data.
 
-## Local Test
+## MCP Tools
+
+| Tool | Purpose |
+| --- | --- |
+| `search_providers` | Search developer services by category or keyword. |
+| `recommend_providers` | Rank providers for one use case. |
+| `recommend_stack` | Shortlist a small app stack. |
+| `get_provider_detail` | Fetch catalog details for one provider. |
+
+## Local Development
 
 ```bash
 npm install
@@ -133,20 +135,7 @@ npm run doctor
 npm run mcp:catalog
 ```
 
-The MCP server defaults to the hosted Nullcost API at `https://nullcost.xyz`, so you do not need to run the website locally.
-
-## What It Exposes
-
-| Tool | Purpose |
-| --- | --- |
-| `search_providers` | Search developer services by category or keyword. |
-| `recommend_providers` | Rank providers for one use case. |
-| `recommend_stack` | Shortlist a small app stack, such as hosting + auth + Postgres + email. |
-| `get_provider_detail` | Fetch catalog details for one provider. |
-
-## Boundary
-
-This repo is Apache-2.0 licensed. The hosted Nullcost website, hosted database contents, production credentials, referral routing data, and user data are not part of this repo or license grant.
+The MCP server defaults to `https://nullcost.xyz`, so you do not need to run the website or Supabase locally.
 
 ## License
 
