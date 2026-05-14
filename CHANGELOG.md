@@ -5,6 +5,11 @@
 - Add `nullcost-plugin` CLI for low-token installs into Codex, Claude Desktop, Cursor, Windsurf, and generic MCP clients.
 - Add installer doctor checks for MCP startup, advertised tools, and optional live catalog smoke tests.
 
+## 0.1.3
+
+- Keep domain email hosting intent separate from transactional email API fallback results.
+- Preserve hosted recommendation routing while tightening local MCP fallback matching.
+
 ## 0.1.2
 
 - Prefer the hosted `/api/recommend` ranking path so installed MCP clients receive compact, server-ranked shortlists.
