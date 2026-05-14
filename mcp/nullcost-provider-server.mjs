@@ -758,11 +758,30 @@ function hasCodeHostingIntent(text) {
   );
 }
 
+function hasDomainEmailHostingIntent(text) {
+  return (
+    /\b(?:mailbox|mailboxes|inbox|imap|pop3|mx)\b/.test(text) ||
+    /\bcustom domain\b/.test(text) ||
+    /\bemail host(?:ing)?\b/.test(text) ||
+    /\bmail host(?:ing)?\b/.test(text) ||
+    /\bmailbox hosting\b/.test(text) ||
+    /\bhost(?:ed)? email\b/.test(text)
+  );
+}
+
+function hasTransactionalEmailIntent(text) {
+  return /\btransactional email\b|\bemail api\b|\bsmtp relay\b|\bpassword reset\b|\bmagic link\b|\bdeliverability\b|\bsend email(?:s)?\b|\bsending email(?:s)?\b/.test(
+    text,
+  );
+}
+
 function inferStrictCategoryIntents(text) {
   const requiredCategories = [];
   const requiredSubcategories = [];
   const excludedSubcategories = [];
   const reasons = [];
+  const domainEmailHostingIntent = hasDomainEmailHostingIntent(text);
+  const transactionalEmailIntent = hasTransactionalEmailIntent(text);
   const gpuComputeIntent = hasGpuComputeIntent(text);
   const aiObservabilityIntent = hasAiObservabilityIntent(text);
   const vectorDatabaseIntent = hasVectorDatabaseIntent(text);
@@ -770,7 +789,17 @@ function inferStrictCategoryIntents(text) {
   const inferenceApiIntent = hasInferenceApiIntent(text);
   const codeHostingIntent = hasCodeHostingIntent(text);
 
-  if (gpuComputeIntent) {
+  if (domainEmailHostingIntent) {
+    requiredCategories.push("email");
+    requiredSubcategories.push("email_hosting", "email_forwarding", "mailbox_hosting");
+    excludedSubcategories.push("email_api", "email_marketing");
+    reasons.push("strict domain email hosting intent");
+  } else if (transactionalEmailIntent) {
+    requiredCategories.push("email");
+    requiredSubcategories.push("email_api");
+    excludedSubcategories.push("email_hosting", "email_forwarding", "mailbox_hosting");
+    reasons.push("strict transactional email intent");
+  } else if (gpuComputeIntent) {
     requiredSubcategories.push("gpu_compute", "gpu_notebook");
     excludedSubcategories.push(
       "ai_gateway",
