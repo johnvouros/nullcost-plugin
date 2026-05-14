@@ -31,6 +31,16 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="docs/assets/nullcost-catalog-demo.webm">
+    <img src="docs/assets/nullcost-catalog-demo-preview.gif" alt="Nullcost catalog-backed provider shortlist demo">
+  </a>
+</p>
+
+<p align="center">
+  <a href="docs/assets/nullcost-catalog-demo.webm">Open the full demo video</a>
+</p>
+
 ## Install
 
 Codex:
