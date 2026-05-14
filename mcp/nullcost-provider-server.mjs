@@ -19,7 +19,7 @@ const providerDetailCache = new Map();
 
 const server = new McpServer({
   name: "nullcost-provider-catalog",
-  version: "0.1.0",
+  version: "0.1.1",
 });
 
 function getDefaultBaseUrl() {
@@ -1131,6 +1131,14 @@ function pushReason(reasons, reason) {
 }
 
 function parseNumericPrice(provider) {
+  if (getEffectiveFreeTier(provider) === "yes") {
+    return 0;
+  }
+
+  if (getEffectiveFreeTrial(provider) === "yes") {
+    return 0;
+  }
+
   const normalizedAmount =
     typeof provider.startingPriceAmount === "number"
       ? provider.startingPriceAmount
@@ -1537,7 +1545,9 @@ function serializeProviderRecommendation(provider) {
     useCase: provider.useCase,
     website: provider.website,
     pricingModel: provider.pricingModel,
-    startingPrice: getEffectiveStartingPrice(provider),
+    startingPrice: getPriceText(provider),
+    rawStartingPrice: provider.startingPrice || "",
+    freeEntry: getFreeEntryText(provider),
     freeTier: getEffectiveFreeTier(provider),
     freeTrial: getEffectiveFreeTrial(provider),
     selfServe: getEffectiveSelfServe(provider),
@@ -1896,7 +1906,7 @@ function formatProviderDetail(provider) {
     provider.docsUrl ? `Docs: ${provider.docsUrl}` : null,
     provider.pricingUrl ? `Pricing: ${provider.pricingUrl}` : null,
     provider.signupUrl ? `Signup: ${provider.signupUrl}` : null,
-    getEffectiveStartingPrice(provider) ? `Starting price: ${getEffectiveStartingPrice(provider)}` : null,
+    getPriceText(provider) ? `Catalog price/free-entry signal: ${getPriceText(provider)}` : null,
     bestStartingPlan
       ? `Starting plan captured: ${bestStartingPlan.name} — ${bestStartingPlan.priceLabel || "Pricing unknown"}`
       : null,
@@ -2513,6 +2523,14 @@ function getEffectiveStartingPrice(provider) {
     return firstSelfServePlan.priceLabel;
   }
 
+  if (getEffectiveFreeTier(provider) === "yes") {
+    return "Free tier";
+  }
+
+  if (getEffectiveFreeTrial(provider) === "yes") {
+    return "Free trial";
+  }
+
   if (provider.startingPrice) {
     return provider.startingPrice;
   }
@@ -2532,17 +2550,11 @@ function getPriceText(provider) {
   const effectiveFreeTrial = getEffectiveFreeTrial(provider);
   const effectiveStartingPrice = getEffectiveStartingPrice(provider);
 
-  if (effectiveFreeTier === "yes" && effectiveStartingPrice) {
-    return `${effectiveStartingPrice} + free tier`;
-  }
   if (effectiveFreeTier === "yes") {
-    return "Free tier";
-  }
-  if (effectiveFreeTrial === "yes" && effectiveStartingPrice) {
-    return `${effectiveStartingPrice} + free trial`;
+    return getFreeEntryText(provider);
   }
   if (effectiveFreeTrial === "yes") {
-    return "Free trial";
+    return getFreeEntryText(provider);
   }
   if (effectiveStartingPrice) {
     return effectiveStartingPrice;
@@ -2585,11 +2597,14 @@ function getFreeEntryText(provider) {
   const effectiveFreeTier = getEffectiveFreeTier(provider);
   const effectiveFreeTrial = getEffectiveFreeTrial(provider);
 
+  if (effectiveFreeTier === "yes" && effectiveFreeTrial === "yes") {
+    return "Free tier + trial";
+  }
   if (effectiveFreeTier === "yes") {
-    return "Tier";
+    return "Free tier";
   }
   if (effectiveFreeTrial === "yes") {
-    return "Trial";
+    return "Free trial";
   }
   return "None";
 }
@@ -2685,9 +2700,7 @@ function chooseDisplayColumns(providers, contextText = "", mode = "search") {
   const setupVaries = hasVariance(providers.map((provider) => provider.setupFriction));
   const mcpVaries = hasVariance(providers.map((provider) => provider.mcpAvailable)) || providers.some((provider) => isYes(provider.mcpAvailable));
   const freeEntryVaries =
-    hasVariance(providers.map((provider) => provider.freeTier)) ||
-    hasVariance(providers.map((provider) => provider.freeTrial)) ||
-    hasVariance(providers.map((provider) => provider.startingPrice));
+    hasVariance(providers.map((provider) => getFreeEntryText(provider)));
   const apiSurfaceVaries =
     hasVariance(providers.map((provider) => provider.apiAvailable)) ||
     hasVariance(providers.map((provider) => provider.cliAvailable));
@@ -3253,7 +3266,9 @@ server.registerTool(
           sourceUrl: response.provider.sourceUrl,
           programUrl: response.provider.programUrl,
           pricingModel: response.provider.pricingModel,
-          startingPrice: getEffectiveStartingPrice(response.provider),
+          startingPrice: getPriceText(response.provider),
+          rawStartingPrice: response.provider.startingPrice || "",
+          freeEntry: getFreeEntryText(response.provider),
           deploymentModel: response.provider.deploymentModel,
           setupFriction: response.provider.setupFriction,
           targetCustomer: response.provider.targetCustomer,
